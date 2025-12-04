@@ -5,6 +5,11 @@ Bienvenido a SQLchat, un servicio no oficial soportado por flask, SQLite y grooq
 -
 Primero(Importante generar llave api groq): Ir a la pagina de groq y generar tu Api Key (Es secreta)
 -
+----------------------------------------------------------------
+ 	Una vez con la llave remplazarla en la linea de codigo 53 del archivo y eliminar los comentarios
+	####GROQ_API_KEY = ""  # <<<<<<<----------------- Api key de groq aquí y quitar comentarios
+----------------------------------------------------------------
+
 
 * En Windows:
 
@@ -41,26 +46,29 @@ data: archivo db que almacena datos de la pagina y de sesión o variables a trav
 user: arvhico db que guarda usuarios
 
 1.- Inicio
-
-Para empezar en el funcionamiento necesitas iniciar Sesión con tus credenciales.
-Tu sesión sesión estará asociada a datos que se reflejaran en la pagina y como se referirá la Ia hacia ti.
+-----------------------------------------------------------------
+		Para empezar en el funcionamiento necesitas iniciar Sesión con tus credenciales.
+		Tu sesión sesión estará asociada a datos que se reflejaran en la pagina y como se referirá la Ia hacia ti.
+-----------------------------------------------------------------
 
 2.- Fase de exploración
-
-En la pagina existen 3 apartados clave:
-*Subir Archivo:
-	Para este lado te permite cargar un archivo .db para empezar la conversación 
-
-*Comenzar Conversación:
-	Para este punto esta el Chat en profundidad y el chat analítico para tus consultas db
-
-*Historial:
-	En este apartado puedes ver todo lo que haz conversado con la Ia tanto como analítica como la de consultas, podras observarlas por errores, exitosas y por categoría(Las consultas se guardan en contenedores según su categoría siendo el archivo en si)
-
+-----------------------------------------------------------------
+	En la pagina existen 3 apartados clave:
+	*Subir Archivo:
+		Para este lado te permite cargar un archivo .db para empezar la conversación 
+	
+	*Comenzar Conversación:
+		Para este punto esta el Chat en profundidad y el chat analítico para tus consultas db
+	
+	*Historial:
+		En este apartado puedes ver todo lo que haz conversado con la Ia tanto como analítica como la de consultas, podras observarlas por errores, exitosas y por categoría(Las consultas se guardan en contenedores según su categoría siendo el archivo en si)
+-----------------------------------------------------------------
 3.- Funcionamiento
 
-*Chat Analítico:
-	Chat analítico puedes pedirlo consultas informales por texto y la Ia te enviara la consulta lista por chat junto con un análisis que es en relación al resto de datos y de la misma base es importante que para que devuelva una consulta exitosa es consultar bien por nombres y columnas, es decir, si la columna se llama "Clientes" es necesario no desviarse de su nombre original para tener éxito.
-
-*Chat en Profundidad:
-	El nombre no representa nada a nivel técnico pero el chat en profundidad te dejara hablar con la Ia de grooq de manera libre pero solo en relación a la base de datos que este seleccionada, de todas formas puedes hablarle de lo que quieras pero el objetivo es que hables de la base actual cargada en cuestión, esta puede darte opiniones y resúmenes clave para darte un encuentro mas cercano a la base de datos, para que asi, al momento de hacer consultas no fallen.
+-----------------------------------------------------------------
+	*Chat Analítico:
+		Chat analítico puedes pedirlo consultas informales por texto y la Ia te enviara la consulta lista por chat junto con un análisis que es en relación al resto de datos y de la misma base es importante que para que devuelva una consulta exitosa es consultar bien por nombres y columnas, es decir, si la columna se llama "Clientes" es necesario no desviarse de su nombre original para tener éxito.
+	
+	*Chat en Profundidad:
+		El nombre no representa nada a nivel técnico pero el chat en profundidad te dejara hablar con la Ia de grooq de manera libre pero solo en relación a la base de datos que este seleccionada, de todas formas puedes hablarle de lo que quieras pero el objetivo es que hables de la base actual cargada en cuestión, esta puede darte opiniones y resúmenes clave para darte un encuentro mas cercano a la base de datos, para que asi, al momento de hacer consultas no fallen.
+-----------------------------------------------------------------
