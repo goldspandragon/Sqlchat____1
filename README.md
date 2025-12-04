@@ -6,9 +6,8 @@ Bienvenido a SQLchat, un servicio no oficial soportado por flask, SQLite y grooq
 Primero(Importante generar llave api groq): Ir a la pagina de groq y generar tu Api Key (Es secreta)
 -
 
-*
-En Windows:
-*
+* En Windows:
+
 
 1.-Entrar a la powershell
 ----------------------------------------------------------------
@@ -16,14 +15,20 @@ En Windows:
 	1.1.- pip install flask
 ----------------------------------------------------------------
 2.-Acceder al directorio de la carpeta del proyecto
+----------------------------------------------------------------
+	En la powerShell es con Cd: y la dirrecion de la carpeta
+----------------------------------------------------------------
 3.-Activar el entorno virtual
 ----------------------------------------------------------------
 	En caso de que no este creado Venv:
 	3.1.-python -m venv venv
 	3.2.-Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass
 -----------------------------------------------------------------
-4.-Ejecutar "Python app.py"
-5.-Para posibles modificaciones abrir el proyecto en tu editor favorito de código(VisualStudioCode)
+4.-Ejecutar el proyecto
+----------------------------------------------------------------
+	En la powershell una vez con todo instalado y el entorno activado:
+	Python app.py
+-----------------------------------------------------------------
 
 
 Características:
