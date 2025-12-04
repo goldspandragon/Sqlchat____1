@@ -1,0 +1,672 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Chat Dinámico IA - SQL Chat</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <!-- Dependencias -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">
+
+  <!-- TU CSS FINAL -->
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+
+  <style>
+      /* 🌙 Variables de Tema */
+      :root {
+          --bg-primary: #ffffff;
+          --bg-secondary: #f8fafc;
+          --text-primary: #1e293b;
+          --text-secondary: #64748b;
+          --border-color: #e2e8f0;
+          --accent-color: #667eea;
+          --accent-hover: #5568d3;
+      }
+
+      [data-theme="dark"] {
+          --bg-primary: #0a0e27;
+          --bg-secondary: #1a1f35;
+          --text-primary: #ffffff;
+          --text-secondary: #ffffff;
+          --border-color: #2d3748;
+          --accent-color: #60a5fa;
+          --accent-hover: #3b82f6;
+      }
+
+      body[data-theme="dark"] {
+          background-color: var(--bg-primary);
+          color: var(--text-primary);
+          transition: background-color 0.3s ease, color 0.3s ease;
+      }
+
+      /* Navbar sin efectos de lag */
+      .custom-navbar {
+          background: var(--bg-primary);
+          box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+          padding: 0.75rem 0;
+          position: relative;
+          z-index: 100;
+          border-bottom: 1px solid var(--border-color);
+          transition: all 0.3s ease;
+      }
+
+      [data-theme="dark"] .custom-navbar {
+          background: var(--bg-primary);
+          border-bottom-color: var(--border-color);
+          box-shadow: 0 2px 8px rgba(0, 0, 0, 0.5);
+      }
+
+      .user-info {
+          color: var(--text-primary);
+      }
+
+      /* Botón de Tema */
+      .btn-theme-toggle {
+          border: 2px solid var(--accent-color);
+          color: var(--accent-color);
+          background: transparent;
+          border-radius: 50%;
+          width: 40px;
+          height: 40px;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          transition: all 0.3s ease;
+          font-size: 1rem;
+          padding: 0;
+      }
+
+      .btn-theme-toggle:hover {
+          background: var(--accent-color);
+          color: white;
+          transform: scale(1.1) rotate(20deg);
+          box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+      }
+
+      [data-theme="dark"] .btn-theme-toggle:hover {
+          box-shadow: 0 4px 20px rgba(96, 165, 250, 0.5);
+      }
+
+      .navbar-brand {
+          font-weight: 700;
+          color: #667eea !important;
+          font-size: 1.3rem;
+          display: flex;
+          align-items: center;
+          gap: 0.5rem;
+          margin-right: auto;
+      }
+
+      [data-theme="dark"] .navbar-brand {
+          color: #60a5fa !important;
+      }
+
+      .navbar-brand i {
+          font-size: 1.5rem;
+      }
+
+      /* Dropdown elegante con z-index */
+      .dropdown {
+          position: relative;
+          z-index: 1050;
+      }
+
+      .custom-dropdown {
+          border: none;
+          background: linear-gradient(135deg, #ffffff 0%, #f9fafb 100%);
+          box-shadow: 0 10px 40px rgba(102, 126, 234, 0.2);
+          border-radius: 14px;
+          padding: 0.75rem 0;
+          margin-top: 0.75rem;
+          min-width: 260px;
+          border: 1px solid rgba(102, 126, 234, 0.2);
+          animation: slideDown 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+          transition: all 0.3s ease;
+      }
+
+      [data-theme="dark"] .custom-dropdown {
+          background: linear-gradient(135deg, #1a1f35 0%, #0a0e27 100%);
+          border: 1px solid rgba(96, 165, 250, 0.3);
+          box-shadow: 0 10px 40px rgba(0, 0, 0, 0.6);
+      }
+
+      @keyframes slideDown {
+          from {
+              opacity: 0;
+              transform: translateY(-12px);
+          }
+          to {
+              opacity: 1;
+              transform: translateY(0);
+          }
+      }
+
+      .custom-dropdown .dropdown-item {
+          padding: 0.95rem 1.5rem;
+          font-weight: 500;
+          color: #2d3748;
+          transition: all 0.15s ease;
+          border-left: 4px solid transparent;
+          display: flex;
+          align-items: center;
+          gap: 0.875rem;
+          position: relative;
+      }
+
+      [data-theme="dark"] .custom-dropdown .dropdown-item {
+          color: #f1f5f9;
+      }
+
+      .custom-dropdown .dropdown-item i {
+          min-width: 1.25rem;
+          text-align: center;
+          color: #667eea;
+          font-size: 1.05rem;
+      }
+
+      [data-theme="dark"] .custom-dropdown .dropdown-item i {
+          color: #60a5fa;
+      }
+
+      .custom-dropdown .dropdown-item:hover {
+          background: linear-gradient(to right, rgba(102, 126, 234, 0.08), transparent);
+          color: #667eea;
+          border-left-color: #667eea;
+          padding-left: 2rem;
+      }
+
+      [data-theme="dark"] .custom-dropdown .dropdown-item:hover {
+          background: linear-gradient(to right, rgba(96, 165, 250, 0.2), transparent);
+          color: #60a5fa;
+          border-left-color: #60a5fa;
+      }
+
+      .custom-dropdown .dropdown-item.text-danger {
+          color: #2d3748;
+      }
+
+      [data-theme="dark"] .custom-dropdown .dropdown-item.text-danger {
+          color: #f1f5f9;
+      }
+
+      .custom-dropdown .dropdown-item.text-danger i {
+          color: #ef4444;
+      }
+
+      .custom-dropdown .dropdown-item.text-danger:hover {
+          background: linear-gradient(to right, rgba(239, 68, 68, 0.08), transparent);
+          color: #dc2626;
+          border-left-color: #dc2626;
+      }
+
+      [data-theme="dark"] .custom-dropdown .dropdown-item.text-danger:hover {
+          background: linear-gradient(to right, rgba(239, 68, 68, 0.2), transparent);
+          color: #ff6b6b;
+          border-left-color: #ff6b6b;
+      }
+
+      .custom-dropdown .dropdown-divider {
+          margin: 0.5rem 0;
+          border-color: rgba(102, 126, 234, 0.1);
+      }
+
+      [data-theme="dark"] .custom-dropdown .dropdown-divider {
+          border-color: rgba(96, 165, 250, 0.1);
+      }
+
+      .dropdown-toggle::after {
+          border-color: #667eea;
+          margin-left: 0.5rem;
+          transition: transform 0.2s ease;
+      }
+
+      .dropdown-toggle[aria-expanded="true"]::after {
+          transform: rotate(180deg);
+      }
+
+      .btn-outline-primary {
+          border-color: #667eea;
+          color: #667eea;
+          transition: all 0.2s ease;
+          font-weight: 600;
+          display: flex;
+          align-items: center;
+          gap: 0.5rem;
+      }
+
+      [data-theme="dark"] .btn-outline-primary {
+          border-color: #60a5fa;
+          color: #60a5fa;
+      }
+
+      .btn-outline-primary:hover {
+          background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+          border-color: #667eea;
+          color: white;
+          box-shadow: 0 4px 14px rgba(102, 126, 234, 0.3);
+      }
+
+      [data-theme="dark"] .btn-outline-primary:hover {
+          background: linear-gradient(135deg, #60a5fa 0%, #3b82f6 100%);
+          border-color: #60a5fa;
+          color: white;
+          box-shadow: 0 4px 14px rgba(96, 165, 250, 0.4);
+      }
+
+      /* 🌙 MODO OSCURO - Estilos Adicionales Chat Profundo */
+      
+      /* Sidebar Modo Oscuro */
+      [data-theme="dark"] .sidebar {
+          background: linear-gradient(180deg, #0f1419 0%, #1a1f2e 100%);
+          border-right-color: var(--border-color);
+      }
+
+      [data-theme="dark"] .sidebar h6 {
+          color: #ffffff;
+      }
+
+      [data-theme="dark"] .sidebar .text-center {
+          color: #ffffff;
+      }
+
+      [data-theme="dark"] .sidebar .text-muted {
+          color: #ffffff !important;
+      }
+
+      /* Main Panel Modo Oscuro */
+      [data-theme="dark"] .main-panel {
+          background: linear-gradient(180deg, #0a0e27 0%, #141829 100%);
+          border-radius: 0;
+      }
+
+      /* Chat Box Modo Oscuro */
+      [data-theme="dark"] .chat-box {
+          background: #0f1419;
+      }
+
+      /* Chat Messages Modo Oscuro */
+      [data-theme="dark"] .chat-msg.user .user-bubble {
+          background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+          color: white;
+      }
+
+      [data-theme="dark"] .chat-msg.ai .ai-bubble {
+          background: #2a3142;
+          color: #ffffff;
+          border-color: rgba(96, 165, 250, 0.2);
+      }
+
+      /* Chat Form Modo Oscuro */
+      [data-theme="dark"] #chatForm {
+          background: #1a1f2e;
+          padding: 1.5rem;
+          border-top: 1px solid var(--border-color);
+      }
+
+      [data-theme="dark"] #chatForm .form-control {
+          background-color: #2a3142;
+          border-color: rgba(96, 165, 250, 0.2);
+          color: #ffffff;
+      }
+
+      [data-theme="dark"] #chatForm .form-control::placeholder {
+          color: #94a3b8;
+      }
+
+      [data-theme="dark"] #chatForm .form-control:focus {
+          background-color: #3a4558;
+          border-color: #60a5fa;
+          box-shadow: 0 0 0 0.15rem rgba(96, 165, 250, 0.3);
+          color: #ffffff;
+      }
+
+      [data-theme="dark"] #chatForm .btn-primary {
+          background: linear-gradient(135deg, #60a5fa 0%, #3b82f6 100%);
+          border: none;
+          color: white;
+      }
+
+      [data-theme="dark"] #chatForm .btn-primary:hover {
+          background: linear-gradient(135deg, #3b82f6 0%, #1e40af 100%);
+          box-shadow: 0 4px 15px rgba(96, 165, 250, 0.4);
+      }
+
+      /* DB Item Modo Oscuro */
+      [data-theme="dark"] .db-item {
+          background: #1a1f2e;
+          border: 1px solid rgba(96, 165, 250, 0.15);
+          color: #ffffff;
+      }
+
+      [data-theme="dark"] .db-item .db-info {
+          color: #ffffff;
+      }
+
+      [data-theme="dark"] .db-item .text-primary {
+          color: #60a5fa !important;
+      }
+
+      [data-theme="dark"] .db-item .btn {
+          border-color: #60a5fa;
+          color: #60a5fa;
+      }
+
+      [data-theme="dark"] .db-item .btn:hover {
+          background: #60a5fa;
+          color: #0a0e27;
+      }
+
+      /* Section Headers Modo Oscuro */
+      [data-theme="dark"] .main-panel h5 {
+          color: #ffffff;
+      }
+
+      [data-theme="dark"] .main-panel .text-primary {
+          color: #60a5fa !important;
+      }
+
+      /* 🌟 Asegurar TODOS los textos visibles en dark mode */
+      [data-theme="dark"] {
+          background-color: #0a0e27;
+          color: #ffffff;
+      }
+
+      [data-theme="dark"] h1,
+      [data-theme="dark"] h2,
+      [data-theme="dark"] h3,
+      [data-theme="dark"] h4,
+      [data-theme="dark"] h5,
+      [data-theme="dark"] h6,
+      [data-theme="dark"] p,
+      [data-theme="dark"] span,
+      [data-theme="dark"] label,
+      [data-theme="dark"] li {
+          color: #ffffff;
+      }
+
+      [data-theme="dark"] .chat-msg .user-bubble,
+      [data-theme="dark"] .chat-msg .ai-bubble,
+      [data-theme="dark"] .ai-bubble strong,
+      [data-theme="dark"] .user-bubble strong {
+          color: #ffffff;
+      }
+
+      [data-theme="dark"] table {
+          color: #ffffff;
+          border-color: #2d3748;
+      }
+
+      [data-theme="dark"] table tr,
+      [data-theme="dark"] table td,
+      [data-theme="dark"] table th {
+          color: #ffffff;
+          border-color: #2d3748;
+      }
+
+      [data-theme="dark"] .table-responsive {
+          color: #ffffff;
+      }
+
+      [data-theme="dark"] .btn {
+          color: #ffffff;
+      }
+
+      [data-theme="dark"] .text-muted {
+          color: #ffffff !important;
+      }
+  </style>
+</head>
+
+<body>
+  <!-- 🧊 NAVBAR -->
+  <nav class="navbar navbar-expand-lg custom-navbar">
+      <div class="container-fluid d-flex justify-content-between align-items-center px-3 px-md-4">
+          <a class="navbar-brand" href="/"><i class="bi bi-database-gear"></i> SQL Chat IA</a>
+          
+          <div class="d-flex align-items-center gap-2 gap-lg-3">
+              {% if session.get('username') %}
+                  <span class="user-info small fw-semibold d-none d-md-inline">👋 <strong>{{ session['username'] }}</strong></span>
+                  
+                  <!-- Toggle Tema Oscuro -->
+                  <button id="themeToggleBtn" class="btn btn-theme-toggle" title="Cambiar tema">
+                    <i class="bi bi-moon-fill"></i>
+                  </button>
+                  
+                  <!-- Menú desplegable -->
+                  <div class="dropdown">
+                      <button class="btn btn-outline-primary btn-sm dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                          <i class="bi bi-menu-button-wide"></i> Menú
+                      </button>
+                      <ul class="dropdown-menu dropdown-menu-end custom-dropdown">
+                          <li><a class="dropdown-item" href="/"><i class="bi bi-house"></i> Dashboard</a></li>
+                          <li><a class="dropdown-item" href="/historial"><i class="bi bi-clock-history"></i> Ver Historial</a></li>
+                          <li><hr class="dropdown-divider"></li>
+                          <li><a class="dropdown-item text-danger" href="{{ url_for('logout') }}"><i class="bi bi-box-arrow-right"></i> Cerrar sesión</a></li>
+                      </ul>
+                  </div>
+              {% else %}
+                  <a href="{{ url_for('login') }}" class="btn btn-sm btn-outline-primary me-2">
+                      <i class="bi bi-box-arrow-in-right"></i> Iniciar sesión
+                  </a>
+                  <a href="{{ url_for('register') }}" class="btn btn-sm btn-outline-primary">
+                      <i class="bi bi-person-plus"></i> Registrarse
+                  </a>
+              {% endif %}
+          </div>
+      </div>
+  </nav>
+
+  <!-- 💬 DASHBOARD -->
+  <div class="dashboard-container container-fluid mt-4">
+      <div class="dashboard d-flex flex-row justify-content-center align-items-stretch">
+
+<!-- 📁 PANEL IZQUIERDO -->
+<div class="sidebar">
+
+    <h6 class="fw-semibold mb-3 text-center">
+        <i class="bi bi-info-circle"></i> Información
+    </h6>
+
+    <div class="db-list">
+        <div class="db-item">
+            <div class="db-info">
+                <i class="bi bi-database"></i> Base actual:
+            </div>
+            <p class="mt-2 fw-bold text-primary">
+                {{ session.get('selected_db', 'Ninguna') }}
+            </p>
+            <a href="/" class="btn btn-sm btn-outline-primary w-100 mt-2">
+                <i class="bi bi-arrow-left"></i> Cambiar base
+            </a>
+        </div>
+
+    </div>
+
+    <hr>
+
+    <h6 class="fw-semibold text-center">
+        <i class="bi bi-clock-history"></i> Navegación
+    </h6>
+
+    <div class="d-flex flex-column gap-2">
+        <a href="/" class="btn btn-outline-secondary btn-sm">
+            <i class="bi bi-house"></i> Dashboard
+        </a>
+        <a href="/historial" class="btn btn-outline-secondary btn-sm">
+            <i class="bi bi-file-text"></i> Historial
+        </a>
+    </div>
+
+</div>
+
+<!-- 🧠 CHAT PRINCIPAL -->
+<div class="main-panel flex-grow-1 p-4 rounded-4 shadow-sm position-relative">
+
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <h5 class="fw-bold">
+            <i class="bi bi-chat-dots-fill"></i> Chat Dinámico - Base: <span class="text-primary">{{ session.get('selected_db', 'Ninguna') }}</span>
+        </h5>
+    </div>
+
+    <div id="chatBox" class="chat-box">
+        {% if mensajes %}
+            {% for m in mensajes %}
+                <!-- Mensaje usuario -->
+                {% if m.role == 'user' %}
+                <div class="chat-msg user">
+                    <div class="user-bubble">
+                        <strong>Tú:</strong> {{ m.message }}
+                    </div>
+                </div>
+                <!-- Mensaje IA -->
+                {% else %}
+                <div class="chat-msg ai fade-in">
+                    <div class="ai-bubble analisis">
+                        <strong><i class="bi bi-lightbulb"></i> IA:</strong>
+                        <div class="ia-response-content mt-2">
+                            {{ m.message }}
+                        </div>
+                    </div>
+                </div>
+                {% endif %}
+            {% endfor %}
+        {% else %}
+            <p class="text-muted text-center mt-5">
+                🧠 Aún no hay conversaciones. ¡Haz tu primera consulta!
+            </p>
+        {% endif %}
+    </div>
+
+    <form id="chatForm" method="POST" action="/chat_profundo_enviar" class="consulta-form d-flex gap-2 mt-3">
+        <input 
+            type="text" 
+            id="userInput" 
+            name="mensaje" 
+            class="form-control" 
+            placeholder="Escribe tu consulta o pregunta aquí..." 
+            required
+        >
+        <button type="submit" class="btn btn-success px-4">
+            <i class="bi bi-send"></i> Enviar
+        </button>
+    </form>
+
+    <div id="typingIndicator" class="typing-indicator text-muted small mt-2" style="display:none;">
+        <i class="bi bi-three-dots"></i> La IA está respondiendo...
+    </div>
+
+</div>
+
+</div></div>
+
+<!-- 🧩 TOASTS -->
+<div id="toast-container">
+    {% with messages = get_flashed_messages() %}
+      {% if messages %}
+        {% for msg in messages %}
+          <div class="toast text-bg-light border-0 mb-2 shadow" role="alert">
+            <div class="d-flex">
+              <div class="toast-body">{{ msg }}</div>
+            </div>
+          </div>
+        {% endfor %}
+      {% endif %}
+    {% endwith %}
+</div>
+
+<footer class="mt-5 text-center">
+    <p>© 2025 SQL Chat con IA — <strong>Flask + Groq API</strong></p>
+</footer>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+
+<script>
+    // 🌙 Gestionar Tema Oscuro
+    const themeToggleBtn = document.getElementById("themeToggleBtn");
+    const htmlElement = document.documentElement;
+    
+    // Cargar tema guardado
+    const savedTheme = localStorage.getItem("theme") || "light";
+    htmlElement.setAttribute("data-theme", savedTheme);
+    updateThemeIcon(savedTheme);
+    
+    // Cambiar tema
+    if (themeToggleBtn) {
+        themeToggleBtn.addEventListener("click", () => {
+            const currentTheme = htmlElement.getAttribute("data-theme");
+            const newTheme = currentTheme === "light" ? "dark" : "light";
+            htmlElement.setAttribute("data-theme", newTheme);
+            localStorage.setItem("theme", newTheme);
+            updateThemeIcon(newTheme);
+        });
+    }
+    
+    function updateThemeIcon(theme) {
+        if (themeToggleBtn) {
+            themeToggleBtn.innerHTML = theme === "dark" 
+                ? '<i class="bi bi-sun-fill"></i>' 
+                : '<i class="bi bi-moon-fill"></i>';
+        }
+    }
+
+    // Scroll automático
+    const chatBox = document.getElementById("chatBox");
+    function scrollToBottom() { 
+        if (chatBox) chatBox.scrollTop = chatBox.scrollHeight; 
+    }
+    window.onload = scrollToBottom;
+
+    // Indicador de escritura
+    const form = document.getElementById("chatForm");
+    const typingIndicator = document.getElementById("typingIndicator");
+    if (form) {
+        form.addEventListener("submit", () => {
+            typingIndicator.style.display = "block";
+            setTimeout(() => typingIndicator.style.display = "none", 2500);
+            setTimeout(scrollToBottom, 600);
+        });
+    }
+</script>
+
+<script>
+    document.addEventListener("DOMContentLoaded", () => {
+        const notifs = document.querySelectorAll(".toast-popup");
+        notifs.forEach(n => {
+            setTimeout(() => n.remove(), 4100);
+        });
+    });
+</script>
+
+<script>
+    const toggle = document.getElementById("menuToggle");
+    const panel = document.getElementById("floatingPanel");
+
+    toggle.addEventListener("click", () => {
+        panel.classList.toggle("active");
+    });
+
+    // Cerrar panel si haces clic fuera
+    document.addEventListener("click", (e) => {
+        if (!panel.contains(e.target) && e.target !== toggle) {
+            panel.classList.remove("active");
+        }
+    });
+</script>
+
+<!-- 🔔 NOTIFICACIONES ELEGANTES (PARTE SUPERIOR DERECHA) -->
+<div id="toastArea" class="toast-area">
+    {% with messages = get_flashed_messages() %}
+        {% if messages %}
+            {% for msg in messages %}
+                <div class="toast-popup">
+                    {{ msg }}
+                </div>
+            {% endfor %}
+        {% endif %}
+    {% endwith %}
+</div>
+
+</body>
+</html>

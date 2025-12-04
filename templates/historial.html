@@ -1,0 +1,1218 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Historial de Consultas - SQLChat Pro</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/atom-one-dark.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            color: #333;
+        }
+
+        /* Navbar */
+        .navbar {
+            background: rgba(255, 255, 255, 0.95);
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            padding: 1rem 0;
+        }
+
+        .navbar-brand {
+            font-weight: 700;
+            color: #667eea !important;
+            font-size: 1.5rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 1rem;
+            align-items: center;
+        }
+
+        .nav-links a {
+            color: #667eea;
+            text-decoration: none;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            padding: 0.5rem 1rem;
+            border-radius: 6px;
+        }
+
+        .nav-links a:hover {
+            background: rgba(102, 126, 234, 0.1);
+            color: #764ba2;
+        }
+
+        .nav-links .btn-logout {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white !important;
+            padding: 0.5rem 1.5rem !important;
+            border-radius: 6px;
+        }
+
+        /* Container */
+        .container {
+            max-width: 1200px;
+            margin-top: 2rem;
+            margin-bottom: 2rem;
+        }
+
+        .header {
+            text-align: center;
+            color: white;
+            margin-bottom: 2rem;
+        }
+
+        .header h1 {
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.2);
+        }
+
+        .header p {
+            font-size: 1.1rem;
+            opacity: 0.9;
+        }
+
+        /* Tabs */
+        .nav-tabs {
+            border-bottom: 2px solid rgba(255, 255, 255, 0.3);
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 12px 12px 0 0;
+            padding: 1rem;
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        .nav-tabs .nav-link {
+            color: white;
+            background: rgba(255, 255, 255, 0.2);
+            border: none;
+            border-radius: 8px;
+            padding: 0.75rem 1.5rem;
+            font-weight: 500;
+            transition: all 0.3s ease;
+        }
+
+        .nav-tabs .nav-link:hover {
+            background: rgba(255, 255, 255, 0.3);
+        }
+
+        .nav-tabs .nav-link.active {
+            background: white;
+            color: #667eea;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+        }
+
+        /* Tab Content */
+        .tab-content {
+            background: white;
+            border-radius: 0 0 12px 12px;
+            padding: 2rem;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+        }
+
+        .tab-pane {
+            animation: fadeIn 0.3s ease-in;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* Contenedor Grid para Secciones */
+        .db-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(500px, 1fr));
+            gap: 2rem;
+            margin-bottom: 2rem;
+        }
+
+        @media (max-width: 1200px) {
+            .db-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        /* Secciones de Bases de Datos */
+        .db-section {
+            border-left: 5px solid #667eea;
+            background: #f8f9fa;
+            border-radius: 8px;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            height: 100%;
+        }
+
+        .db-section:hover {
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.15);
+            transition: all 0.3s ease;
+        }
+
+        .db-header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 1.25rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .db-header:hover {
+            transform: translateX(5px);
+        }
+
+        .db-header-left {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .db-icon {
+            font-size: 1.5rem;
+            background: rgba(255, 255, 255, 0.2);
+            padding: 0.5rem 0.75rem;
+            border-radius: 6px;
+        }
+
+        .db-title {
+            font-size: 1.1rem;
+            font-weight: 700;
+        }
+
+        .db-badge {
+            background: rgba(255, 255, 255, 0.3);
+            padding: 0.35rem 0.75rem;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            font-weight: 600;
+        }
+
+        .db-toggle {
+            font-size: 1.2rem;
+            transition: transform 0.3s ease;
+        }
+
+        .db-section.collapsed .db-toggle {
+            transform: rotate(-90deg);
+        }
+
+        .db-content {
+            padding: 1.5rem;
+            display: none;
+            max-height: 500px;
+            overflow-y: auto;
+            flex-grow: 1;
+        }
+
+        .db-section.expanded .db-content {
+            display: block;
+            animation: slideDown 0.3s ease;
+        }
+
+        @keyframes slideDown {
+            from {
+                opacity: 0;
+                max-height: 0;
+            }
+            to {
+                opacity: 1;
+                max-height: 1000px;
+            }
+        }
+
+        /* Consultas */
+        .consulta-item {
+            background: white;
+            border-left: 4px solid #667eea;
+            border-radius: 6px;
+            padding: 1.25rem;
+            margin-bottom: 1rem;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+            transition: all 0.3s ease;
+        }
+
+        .consulta-item:hover {
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.15);
+            transform: translateY(-2px);
+        }
+
+        .consulta-item.user-message {
+            border-left-color: #667eea;
+            background: linear-gradient(to right, #f0f4ff, white);
+        }
+
+        .consulta-item.assistant-message {
+            border-left-color: #10b981;
+            background: linear-gradient(to right, #f0fdf4, white);
+        }
+
+        .consulta-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 0.75rem;
+        }
+
+        .mensaje-rol {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-weight: 600;
+            font-size: 0.9rem;
+            padding: 0.5rem 1rem;
+            border-radius: 20px;
+            background: rgba(102, 126, 234, 0.1);
+            color: #667eea;
+        }
+
+        .mensaje-rol.assistant {
+            background: rgba(16, 185, 129, 0.1);
+            color: #10b981;
+        }
+
+        .timestamp {
+            font-size: 0.85rem;
+            color: #999;
+            font-weight: 500;
+        }
+
+        .mensaje-contenido {
+            color: #333;
+            line-height: 1.6;
+            word-wrap: break-word;
+            background: white;
+            padding: 1rem;
+            border-radius: 6px;
+            border: 1px solid #e5e7eb;
+            margin-top: 0.75rem;
+        }
+
+        .mensaje-contenido code {
+            background: #f3f4f6;
+            padding: 0.25rem 0.5rem;
+            border-radius: 3px;
+            font-family: 'Courier New', monospace;
+            font-size: 0.9rem;
+            color: #d63384;
+        }
+
+        .mensaje-contenido pre {
+            background: #1e293b;
+            color: #e2e8f0;
+            padding: 1rem;
+            border-radius: 6px;
+            overflow-x: auto;
+            margin-top: 0.75rem;
+            font-size: 0.85rem;
+        }
+
+        .mensaje-contenido pre code {
+            background: none;
+            color: inherit;
+            padding: 0;
+        }
+
+        /* Empty State */
+        .empty-state {
+            text-align: center;
+            padding: 2rem;
+            color: #999;
+        }
+
+        .empty-state i {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+            opacity: 0.5;
+        }
+
+        .empty-state p {
+            font-size: 1.1rem;
+            margin-bottom: 0.5rem;
+        }
+
+        /* Actions */
+        .action-buttons {
+            text-align: center;
+            padding: 2rem 0 0 0;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border: none;
+            padding: 0.75rem 2rem;
+            font-weight: 600;
+            border-radius: 8px;
+            transition: all 0.3s ease;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 16px rgba(102, 126, 234, 0.4);
+        }
+
+        /* Responsive */
+        @media (max-width: 1400px) {
+            .db-grid {
+                grid-template-columns: repeat(auto-fit, minmax(450px, 1fr));
+            }
+        }
+
+        @media (max-width: 1100px) {
+            .db-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .header h1 {
+                font-size: 1.75rem;
+            }
+
+            .nav-tabs {
+                flex-wrap: wrap;
+            }
+
+            .nav-tabs .nav-link {
+                padding: 0.5rem 1rem;
+                font-size: 0.9rem;
+            }
+
+            .db-header {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 0.75rem;
+            }
+
+            .db-header-left {
+                width: 100%;
+            }
+
+            .consulta-item {
+                padding: 0.875rem;
+            }
+
+            .mensaje-contenido {
+                padding: 0.75rem;
+            }
+
+            .db-grid {
+                grid-template-columns: 1fr;
+                gap: 1.5rem;
+            }
+        }
+
+        /* Colores genéricos por índice - sin dependencia de nombre */
+        .db-section.color-0 .db-header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+
+        .db-section.color-0 .db-icon,
+        .db-section.color-0 .consulta-item {
+            border-left-color: #667eea;
+        }
+
+        .db-section.color-1 .db-header {
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+        }
+
+        .db-section.color-1 .db-icon,
+        .db-section.color-1 .consulta-item {
+            border-left-color: #f5576c;
+        }
+
+        .db-section.color-2 .db-header {
+            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+        }
+
+        .db-section.color-2 .db-icon,
+        .db-section.color-2 .consulta-item {
+            border-left-color: #4facfe;
+        }
+
+        .db-section.color-3 .db-header {
+            background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%);
+        }
+
+        .db-section.color-3 .db-icon,
+        .db-section.color-3 .consulta-item {
+            border-left-color: #43e97b;
+        }
+
+        .db-section.color-4 .db-header {
+            background: linear-gradient(135deg, #fa709a 0%, #fee140 100%);
+        }
+
+        .db-section.color-4 .db-icon,
+        .db-section.color-4 .consulta-item {
+            border-left-color: #fa709a;
+        }
+
+        .db-section.color-5 .db-header {
+            background: linear-gradient(135deg, #30cfd0 0%, #330867 100%);
+        }
+
+        .db-section.color-5 .db-icon,
+        .db-section.color-5 .consulta-item {
+            border-left-color: #30cfd0;
+        }
+
+        .db-section.color-6 .db-header {
+            background: linear-gradient(135deg, #a8edea 0%, #fed6e3 100%);
+        }
+
+        .db-section.color-6 .db-icon,
+        .db-section.color-6 .consulta-item {
+            border-left-color: #a8edea;
+        }
+
+        .db-section.color-7 .db-header {
+            background: linear-gradient(135deg, #ff9466 0%, #ff6b6b 100%);
+        }
+
+        .db-section.color-7 .db-icon,
+        .db-section.color-7 .consulta-item {
+            border-left-color: #ff9466;
+        }
+
+        /* Estilos para Categorías */
+        .categoria-section {
+            margin-bottom: 1.5rem;
+            border-radius: 8px;
+            overflow: hidden;
+            border: 1px solid #e5e7eb;
+            background: #fafbfc;
+        }
+
+        .categoria-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1rem 1.25rem;
+            background: linear-gradient(135deg, #f3f4f6 0%, #e5e7eb 100%);
+            cursor: pointer;
+            transition: all 0.2s ease;
+            border-bottom: 1px solid #d1d5db;
+        }
+
+        .categoria-header:hover {
+            background: linear-gradient(135deg, #e5e7eb 0%, #d1d5db 100%);
+        }
+
+        .categoria-header-left {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            flex: 1;
+        }
+
+        .categoria-icon {
+            font-size: 1.1rem;
+            color: #667eea;
+            min-width: 1.25rem;
+        }
+
+        .categoria-title {
+            font-weight: 600;
+            font-size: 0.95rem;
+            color: #2d3748;
+            text-transform: capitalize;
+        }
+
+        .categoria-badge {
+            background: rgba(102, 126, 234, 0.2);
+            color: #667eea;
+            padding: 0.25rem 0.6rem;
+            border-radius: 12px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            min-width: 2rem;
+            text-align: center;
+        }
+
+        .categoria-toggle {
+            font-size: 1rem;
+            transition: transform 0.3s ease;
+            color: #667eea;
+        }
+
+        .categoria-section .categoria-header:hover .categoria-toggle {
+            color: #764ba2;
+        }
+
+        .categoria-content {
+            display: none;
+            padding: 1rem;
+            max-height: 600px;
+            overflow-y: auto;
+            background: white;
+        }
+
+        .categoria-content.expanded {
+            display: block;
+            animation: slideDown 0.2s ease;
+        }
+
+        .categoria-section:last-child {
+            margin-bottom: 0;
+        }
+
+        /* ==================== ESTILOS PARA DOS COLUMNAS ==================== */
+        .consultas-full-grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 2rem;
+            width: 100%;
+        }
+
+        .db-section-full {
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+            overflow: hidden;
+            border: 1px solid #e5e7eb;
+        }
+
+        .db-section-full.expanded {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .db-section-full.collapsed {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .db-header-full {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1.5rem;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .db-header-full:hover {
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+        }
+
+        .db-header-left {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            flex: 1;
+        }
+
+        .db-icon {
+            font-size: 1.75rem;
+            min-width: 2rem;
+            text-align: center;
+        }
+
+        .db-header-left div:last-child {
+            display: flex;
+            flex-direction: column;
+            gap: 0.25rem;
+        }
+
+        .db-title {
+            font-size: 1.25rem;
+            font-weight: 700;
+        }
+
+        .db-content-full {
+            display: none;
+            padding: 2rem;
+        }
+
+        .db-section-full.expanded .db-content-full {
+            display: block;
+        }
+
+        .db-toggle {
+            font-size: 1.2rem;
+            transition: transform 0.3s ease;
+        }
+
+        .db-section-full.collapsed .db-toggle {
+            transform: rotate(-90deg);
+        }
+
+        /* Dos columnas de consultas */
+        .consultas-dos-columnas {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 2rem;
+            width: 100%;
+        }
+
+        .columna-consultas {
+            display: flex;
+            flex-direction: column;
+            border-radius: 10px;
+            overflow: hidden;
+            border: 1px solid #e5e7eb;
+            background: #fafbfc;
+        }
+
+        .columna-header {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            padding: 1rem 1.25rem;
+            font-weight: 700;
+            font-size: 1rem;
+            color: white;
+        }
+
+        .columna-header.exitosa {
+            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+        }
+
+        .columna-header.error {
+            background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+        }
+
+        .columna-header i {
+            font-size: 1.25rem;
+        }
+
+        .count-badge {
+            margin-left: auto;
+            background: rgba(255, 255, 255, 0.3);
+            padding: 0.35rem 0.75rem;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            font-weight: 600;
+        }
+
+        .columna-contenido {
+            flex: 1;
+            overflow-y: auto;
+            max-height: 600px;
+            padding: 1rem;
+            background: white;
+        }
+
+        .consulta-card {
+            background: white;
+            border-radius: 8px;
+            padding: 1rem;
+            margin-bottom: 1rem;
+            border-left: 4px solid #667eea;
+            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
+            transition: all 0.3s ease;
+        }
+
+        .consulta-card.exitosa {
+            border-left-color: #10b981;
+            background: linear-gradient(to right, #f0fdf4 0%, white 100%);
+        }
+
+        .consulta-card.exitosa:hover {
+            box-shadow: 0 4px 12px rgba(16, 185, 129, 0.15);
+            transform: translateX(4px);
+        }
+
+        .consulta-card.error {
+            border-left-color: #ef4444;
+            background: linear-gradient(to right, #fef2f2 0%, white 100%);
+        }
+
+        .consulta-card.error:hover {
+            box-shadow: 0 4px 12px rgba(239, 68, 68, 0.15);
+            transform: translateX(4px);
+        }
+
+        .consulta-pregunta {
+            margin-bottom: 1rem;
+            padding: 0.75rem;
+            background: #f9fafb;
+            border-radius: 6px;
+            border-left: 3px solid #667eea;
+        }
+
+        .consulta-pregunta strong {
+            display: block;
+            color: #667eea;
+            margin-bottom: 0.5rem;
+            font-size: 0.9rem;
+        }
+
+        .consulta-pregunta p {
+            margin: 0;
+            color: #333;
+            line-height: 1.5;
+            font-size: 0.95rem;
+        }
+
+        .consulta-sql {
+            margin-bottom: 1rem;
+        }
+
+        .consulta-sql strong {
+            display: block;
+            color: #667eea;
+            margin-bottom: 0.5rem;
+            font-size: 0.9rem;
+        }
+
+        .consulta-sql pre {
+            background: #1e293b;
+            color: #e2e8f0;
+            padding: 0.75rem;
+            border-radius: 6px;
+            overflow-x: auto;
+            font-size: 0.8rem;
+            margin: 0;
+        }
+
+        .consulta-sql code {
+            background: none;
+            color: inherit;
+            padding: 0;
+        }
+
+        .consulta-analisis {
+            margin-bottom: 1rem;
+            padding: 0.75rem;
+            background: rgba(102, 126, 234, 0.05);
+            border-radius: 6px;
+            border-left: 3px solid #667eea;
+        }
+
+        .consulta-analisis strong {
+            display: block;
+            color: #667eea;
+            margin-bottom: 0.5rem;
+            font-size: 0.9rem;
+        }
+
+        .consulta-analisis p {
+            margin: 0;
+            color: #333;
+            line-height: 1.5;
+            font-size: 0.9rem;
+        }
+
+        .consulta-resultados {
+            margin-bottom: 0;
+        }
+
+        .consulta-resultados strong {
+            display: block;
+            color: #667eea;
+            margin-bottom: 0.5rem;
+            font-size: 0.9rem;
+        }
+
+        .consulta-resultados table {
+            font-size: 0.8rem;
+            margin: 0;
+        }
+
+        .error-mensaje {
+            padding: 0.75rem;
+            background: #fef2f2;
+            border-radius: 6px;
+            border-left: 3px solid #ef4444;
+        }
+
+        .error-mensaje strong {
+            color: #ef4444;
+            display: block;
+            margin-bottom: 0.5rem;
+            font-size: 0.9rem;
+        }
+
+        .empty-columna {
+            text-align: center;
+            padding: 2rem 1rem;
+            color: #999;
+        }
+
+        .empty-columna i {
+            font-size: 2.5rem;
+            margin-bottom: 0.75rem;
+            opacity: 0.4;
+            display: block;
+        }
+
+        .empty-columna p {
+            font-size: 0.95rem;
+            margin: 0;
+        }
+
+        /* Responsive */
+        @media (max-width: 1200px) {
+            .consultas-dos-columnas {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .db-header-full {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 1rem;
+            }
+
+            .consulta-card {
+                padding: 0.75rem;
+            }
+
+            .columna-contenido {
+                max-height: 400px;
+            }
+        }
+        }
+
+        /* Colores por tipo de BD específicos (compatibilidad) */
+    </style>
+</head>
+<body>
+    <!-- Navbar -->
+    <nav class="navbar">
+        <div class="container-fluid">
+            <span class="navbar-brand">
+                <i class="bi bi-chat-dots-fill" style="color: #667eea;"></i>
+                SQLChat Pro
+            </span>
+            <div class="nav-links">
+                <a href="/">
+                    <i class="bi bi-house-fill"></i> Inicio
+                </a>
+                <a href="/chat_profundo">
+                    <i class="bi bi-chat-left-text-fill"></i> Chat
+                </a>
+                <a href="/historial">
+                    <i class="bi bi-clock-history"></i> Historial
+                </a>
+                <form action="/logout" method="POST" style="display: inline;">
+                    <button type="submit" class="btn btn-logout">
+                        <i class="bi bi-box-arrow-right"></i> Salir
+                    </button>
+                </form>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <div class="container">
+        <!-- Header -->
+        <div class="header">
+            <h1>
+                <i class="bi bi-clock-history"></i> Historial de Consultas
+            </h1>
+            <p>Registro detallado de todas tus consultas por base de datos</p>
+        </div>
+
+        <!-- Tabs -->
+        <ul class="nav-tabs" role="tablist">
+            <li class="nav-item" role="presentation">
+                <button class="nav-link active" id="chat-tab" data-bs-toggle="tab" data-bs-target="#chat-pane" type="button" role="tab">
+                    <i class="bi bi-chat-fill"></i> Chat Profundo
+                </button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link" id="consultas-tab" data-bs-toggle="tab" data-bs-target="#consultas-pane" type="button" role="tab">
+                    <i class="bi bi-database-fill"></i> Consultas por BD
+                </button>
+            </li>
+        </ul>
+
+        <!-- Tab Content -->
+        <div class="tab-content">
+            <!-- Tab 1: Chat Profundo -->
+            <div class="tab-pane fade show active" id="chat-pane" role="tabpanel" tabindex="0">
+                <div style="display: flex; justify-content: flex-end; margin-bottom: 1rem;">
+                    <button class="btn btn-danger btn-sm" onclick="limpiarHistorial('chat')" title="Eliminar todo el historial de chat">
+                        <i class="bi bi-trash3"></i> Limpiar historial
+                    </button>
+                </div>
+                {% if consultas_por_base %}
+                    <div class="db-grid">
+                        {% for db_name, mensajes in consultas_por_base.items() | sort %}
+                            <div class="db-section expanded" data-db="{{ db_name }}">
+                                <div class="db-header" onclick="toggleDB(this)">
+                                    <div class="db-header-left">
+                                        <div class="db-icon">
+                                            <i class="bi bi-database-fill"></i>
+                                        </div>
+                                        <div>
+                                            <div class="db-title">{{ db_name }}</div>
+                                            <small style="opacity: 0.7;">Conversaciones y análisis</small>
+                                        </div>
+                                    </div>
+                                    <div style="display: flex; align-items: center; gap: 1rem;">
+                                        <span class="db-badge">{{ mensajes | length }} mensaje{{ mensajes | length != 1 and 's' or '' }}</span>
+                                        <i class="bi bi-chevron-down db-toggle"></i>
+                                    </div>
+                                </div>
+                                <div class="db-content">
+                                    {% for msg in mensajes %}
+                                        <div class="consulta-item {% if msg.role == 'user' %}user-message{% else %}assistant-message{% endif %}">
+                                            <div class="consulta-header">
+                                                <span class="mensaje-rol {% if msg.role == 'assistant' %}assistant{% endif %}">
+                                                    <i class="bi {% if msg.role == 'user' %}bi-person-fill{% else %}bi-robot{% endif %}"></i>
+                                                    {{ 'Tú' if msg.role == 'user' else 'IA' }}
+                                                </span>
+                                                <span class="timestamp">{{ msg.timestamp | default('Sin fecha') }}</span>
+                                            </div>
+                                            <div class="mensaje-contenido">{{ msg.message }}</div>
+                                        </div>
+                                    {% endfor %}
+                                </div>
+                            </div>
+                        {% endfor %}
+                    </div>
+                {% else %}
+                    <div class="empty-state">
+                        <i class="bi bi-chat-left-dots"></i>
+                        <p>No hay conversaciones de chat aún</p>
+                        <small>Inicia una conversación en el apartado de <strong>Chat</strong></small>
+                    </div>
+                {% endif %}
+            </div>
+
+            <!-- Tab 2: Consultas por Base de Datos -->
+            <div class="tab-pane fade" id="consultas-pane" role="tabpanel" tabindex="0">
+                <div style="display: flex; justify-content: flex-end; margin-bottom: 1rem;">
+                    <button class="btn btn-danger btn-sm" onclick="limpiarHistorial('consultas')" title="Eliminar todas las consultas SQL registradas">
+                        <i class="bi bi-trash3"></i> Limpiar historial
+                    </button>
+                </div>
+                {% if historial_sesion %}
+                    <div class="consultas-full-grid">
+                        {% set bases_consultas = {} %}
+                        
+                        <!-- Agrupar consultas por base de datos (solo con database definido) -->
+                        {% for item in historial_sesion %}
+                            {% set db_key = item.get('database') %}
+                            {% if db_key %}
+                                {% if db_key not in bases_consultas %}
+                                    {% set _ = bases_consultas.update({db_key: {'exitosas': [], 'errores': []}}) %}
+                                {% endif %}
+                                
+                                {% if item.get('exito', False) %}
+                                    {% set _ = bases_consultas[db_key]['exitosas'].append(item) %}
+                                {% else %}
+                                    {% set _ = bases_consultas[db_key]['errores'].append(item) %}
+                                {% endif %}
+                            {% endif %}
+                        {% endfor %}
+                        
+                        <!-- Mostrar secciones por BD con dos columnas -->
+                        {% for db_name, db_data in bases_consultas.items() | sort %}
+                            <div class="db-section-full expanded" data-db="{{ db_name }}">
+                                <div class="db-header-full" onclick="toggleDB(this)">
+                                    <div class="db-header-left">
+                                        <div class="db-icon">
+                                            <i class="bi bi-database-fill"></i>
+                                        </div>
+                                        <div>
+                                            <div class="db-title">{{ db_name }}</div>
+                                            <small style="opacity: 0.7;">Consultas agrupadas por estado</small>
+                                        </div>
+                                    </div>
+                                    <div style="display: flex; align-items: center; gap: 1rem;">
+                                        <span class="db-badge">
+                                            <i class="bi bi-check-circle" style="color: #10b981;"></i> 
+                                            {{ db_data['exitosas'] | length }}
+                                        </span>
+                                        <span class="db-badge">
+                                            <i class="bi bi-exclamation-circle" style="color: #ef4444;"></i> 
+                                            {{ db_data['errores'] | length }}
+                                        </span>
+                                        <i class="bi bi-chevron-down db-toggle"></i>
+                                    </div>
+                                </div>
+                                <div class="db-content-full">
+                                    <div class="consultas-dos-columnas">
+                                        <!-- Columna 1: Consultas Exitosas -->
+                                        <div class="columna-consultas">
+                                            <div class="columna-header exitosa">
+                                                <i class="bi bi-check-circle"></i>
+                                                <span>Consultas Exitosas</span>
+                                                <span class="count-badge">{{ db_data['exitosas'] | length }}</span>
+                                            </div>
+                                            <div class="columna-contenido">
+                                                {% if db_data['exitosas'] %}
+                                                    {% for item in db_data['exitosas'] %}
+                                                        <div class="consulta-card exitosa">
+                                                            <div class="consulta-pregunta">
+                                                                <strong>❓ Pregunta:</strong>
+                                                                <p>{{ item.pregunta }}</p>
+                                                            </div>
+                                                            <div class="consulta-sql">
+                                                                <strong>💾 SQL:</strong>
+                                                                <pre><code>{{ item.sql }}</code></pre>
+                                                            </div>
+                                                            <div class="consulta-analisis">
+                                                                <strong>📊 Análisis IA:</strong>
+                                                                <p>{{ item.analisis }}</p>
+                                                            </div>
+                                                            {% if item.resultado %}
+                                                                <div class="consulta-resultados">
+                                                                    <strong>📋 Resultados (primeros 5):</strong>
+                                                                    <div style="overflow-x: auto; margin-top: 0.5rem;">
+                                                                        <table class="table table-sm table-striped">
+                                                                            <tbody>
+                                                                                {% for row in item.resultado %}
+                                                                                    <tr>
+                                                                                        {% for col in row %}
+                                                                                            <td style="font-size: 0.85rem;">{{ col }}</td>
+                                                                                        {% endfor %}
+                                                                                    </tr>
+                                                                                {% endfor %}
+                                                                            </tbody>
+                                                                        </table>
+                                                                    </div>
+                                                                </div>
+                                                            {% endif %}
+                                                        </div>
+                                                    {% endfor %}
+                                                {% else %}
+                                                    <div class="empty-columna">
+                                                        <i class="bi bi-inbox"></i>
+                                                        <p>Sin consultas exitosas</p>
+                                                    </div>
+                                                {% endif %}
+                                            </div>
+                                        </div>
+
+                                        <!-- Columna 2: Errores -->
+                                        <div class="columna-consultas">
+                                            <div class="columna-header error">
+                                                <i class="bi bi-exclamation-circle"></i>
+                                                <span>Errores</span>
+                                                <span class="count-badge">{{ db_data['errores'] | length }}</span>
+                                            </div>
+                                            <div class="columna-contenido">
+                                                {% if db_data['errores'] %}
+                                                    {% for item in db_data['errores'] %}
+                                                        <div class="consulta-card error">
+                                                            <div class="consulta-pregunta">
+                                                                <strong>❓ Pregunta:</strong>
+                                                                <p>{{ item.pregunta }}</p>
+                                                            </div>
+                                                            <div class="error-mensaje">
+                                                                <strong>⚠️ Error:</strong>
+                                                                <div style="background: #fef2f2; border: 1px solid #fecaca; padding: 0.75rem; border-radius: 6px; color: #991b1b; margin-top: 0.5rem;">
+                                                                    {{ item.resultado }}
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    {% endfor %}
+                                                {% else %}
+                                                    <div class="empty-columna">
+                                                        <i class="bi bi-check-lg"></i>
+                                                        <p>¡Sin errores!</p>
+                                                    </div>
+                                                {% endif %}
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        {% endfor %}
+                    </div>
+                {% else %}
+                    <div class="empty-state">
+                        <i class="bi bi-inbox"></i>
+                        <p>No hay consultas SQL registradas</p>
+                        <small>Las consultas que realices aparecerán aquí</small>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- Action Buttons -->
+        <div class="action-buttons">
+            <a href="/" class="btn btn-primary">
+                <i class="bi bi-arrow-left"></i> Volver al Inicio
+            </a>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/highlight.min.js"></script>
+    <script>
+        // Toggle secciones de BD
+        function toggleDB(header) {
+            const section = header.closest('.db-section-full');
+            section.classList.toggle('expanded');
+            section.classList.toggle('collapsed');
+        }
+
+        // Resaltar código
+        document.querySelectorAll('pre code').forEach(el => {
+            hljs.highlightElement(el);
+        });
+
+        // Asignar colores genéricos por índice (0-7)
+        document.querySelectorAll('.db-section-full').forEach((section, index) => {
+            const colorIndex = index % 8; // 8 colores disponibles
+            section.classList.add(`color-${colorIndex}`);
+        });
+
+        // Función para limpiar historial
+        function limpiarHistorial(tipo) {
+            const mensaje = tipo === 'chat' 
+                ? '¿Estás seguro de que deseas eliminar TODO el historial de chat?' 
+                : '¿Estás seguro de que deseas eliminar TODAS las consultas SQL registradas?';
+            
+            if (confirm(mensaje + '\n\nEsta acción no se puede deshacer.')) {
+                const endpoint = tipo === 'chat' ? '/limpiar_chat' : '/limpiar_consultas';
+                
+                fetch(endpoint, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    }
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        alert('Historial eliminado correctamente');
+                        location.reload();
+                    } else {
+                        alert('Error al eliminar el historial: ' + (data.error || 'Error desconocido'));
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    alert('Error al conectar con el servidor');
+                });
+            }
+        }
+    </script>
+</body>
+</html>
