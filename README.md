@@ -6,7 +6,7 @@ Bienvenido a SQLchat, un servicio no oficial soportado por flask, SQLite y grooq
 Primero(Importante generar llave api groq): Ir a la pagina de groq y generar tu Api Key (Es secreta)
 -
 ----------------------------------------------------------------
- 	Una vez con la llave remplazarla en la linea de codigo 53 del archivo y eliminar los comentarios
+ 	Una vez con la llave remplazarla en la linea de codigo 53 del archivo app.py y eliminar los comentarios
 	####GROQ_API_KEY = ""  # <<<<<<<----------------- Api key de groq aquí y quitar comentarios
 ----------------------------------------------------------------
 
